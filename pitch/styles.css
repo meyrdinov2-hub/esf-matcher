@@ -349,3 +349,8 @@ h2{margin:0;font:650 76px/1.08 var(--display);letter-spacing:-.03em;text-wrap:ba
 @media (max-width:820px){.s-end h2{font-size:52px}.repo{font-size:14px;white-space:normal}}
 .s-pain .stat-t{font-size:24px}
 .s-pain .src{font-size:17px}
+.byline b{color:var(--ink);font-weight:600}
+.byline .mono{color:var(--ok);font-size:.92em}
+.contact{margin:44px 0 0;font:500 28px/1.5 var(--text);color:var(--ink)}
+.contact .mono{font-size:24px;color:var(--ink-3)}
+@media (max-width:820px){.contact{font-size:16px;margin-top:24px}.contact .mono{font-size:13px}}
