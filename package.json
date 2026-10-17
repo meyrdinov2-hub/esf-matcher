@@ -1,0 +1,11 @@
+{
+  "name": "esf-matcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Сопоставление номенклатуры поставщика с внутренним справочником при разборе входящих ЭСФ",
+  "scripts": {
+    "bench": "node src/bench.js",
+    "gen": "node src/generator.js --write"
+  }
+}

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подбор номенклатуры в ЭСФ</title>
+<meta name="description" content="Расширение для «1С:Бухгалтерии для Казахстана»: подбирает номенклатуру во входящих ЭСФ и учится на истории базы. Питч для Digital Taraz Hackathon.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="viewport" id="viewport">
+<div class="deck" id="deck">
+
+<!-- 1 ─────────────────────────────────────────── -->
+<section class="slide s-title" data-title="Титул">
+  <div class="bg glow-green"></div>
+  <div class="frame">
+    <p class="kicker rv">Zhambyl Hub · Digital Taraz Hackathon · 2026</p>
+    <h1 class="rv" style="--d:1">Колонка «Товар»<br>заполняется сама</h1>
+    <p class="lead rv" style="--d:2">Расширение для «1С:Бухгалтерии для&nbsp;Казахстана»: подбирает номенклатуру во&nbsp;входящих ЭСФ и учится на&nbsp;том, как ваша бухгалтерия сопоставляла раньше.</p>
+
+    <div class="match rv" style="--d:3" aria-label="Пример подбора">
+      <div class="match-col">
+        <span class="cap">Поставщик пишет в ЭСФ</span>
+        <span class="mono row-src">ГЕЛЬ ДЛЯ МЫТЬЯ ПОСУДЫ FREYA СОЧНЫЙ ГРЕЙПФРУТ 450МЛ</span>
+      </div>
+      <span class="arrow" aria-hidden="true"></span>
+      <div class="match-col">
+        <span class="cap">Расширение подставляет</span>
+        <span class="row-dst"><i class="dot ok"></i>Средство для мытья рук Чистозря Жидкое мыло 1л</span>
+      </div>
+    </div>
+
+    <p class="byline rv" style="--d:4">Команда: <span class="ph">[название команды]</span> · лидер: <span class="ph">[ФИО]</span></p>
+  </div>
+  <aside class="notes">Мы делаем расширение для «1С:Бухгалтерии для Казахстана». Оно закрывает одну конкретную ручную операцию — подбор номенклатуры во входящих счетах-фактурах. Посмотрите на эту строку: поставщик прислал гель для посуды, а бухгалтерия у себя учитывает его как жидкое мыло. Ни одна модель этого не угадает по тексту. Наша система подставляет правильно, потому что учится на истории самой базы.</aside>
+</section>
+
+<!-- 2 ─────────────────────────────────────────── -->
+<section class="slide s-pain" data-title="Проблема">
+  <div class="bg glow-amber"></div>
+  <div class="frame split">
+    <div class="col-text">
+      <p class="kicker rv">Проблема</p>
+      <h2 class="rv" style="--d:1">ЭСФ загружен.<br>Колонка «Товар» — пустая.</h2>
+      <p class="body rv" style="--d:2">В разделе&nbsp;G поставщик пишет свои названия. Пока колонка не&nbsp;заполнена, поступление по&nbsp;ЭСФ не&nbsp;создать — бухгалтер подбирает каждую строку вручную.</p>
+      <div class="stat rv" style="--d:3">
+        <span class="stat-n mono">10 ЭСФ ≈ 1 час</span>
+        <span class="stat-t">в день на ввод входящих ЭСФ — оценка «Первого БИТа» для бухгалтерии без доработок. Долю подбора номенклатуры в этом часе измерим на пилоте.</span>
+        <span class="src">Источник: 1cbit.kz, «Автоматизируйте ввод и поступление ЭСФ»</span>
+      </div>
+    </div>
+    <div class="col-vis rv" style="--d:2">
+      <div class="esf">
+        <div class="esf-head"><span>Раздел G · наименование поставщика</span><span>Товар</span></div>
+        <div class="esf-row"><span class="mono">СОК ФРУТО НЯНЯ МУЛЬТИФРУКТ 200МЛ</span><span class="empty"></span></div>
+        <div class="esf-row"><span class="mono">BIMAX COLOR ГЕЛЬ Д/СТИРКИ 1,3Л</span><span class="empty"></span></div>
+        <div class="esf-row"><span class="mono">ПОЛО К/Р 100% ХЛОПОК (БЕЛЫЙ XL)</span><span class="empty"></span></div>
+        <div class="esf-row"><span class="mono">ДОМЕСТОС СР-ВО ЧИСТЯЩЕЕ 750МЛ</span><span class="empty"></span></div>
+        <div class="esf-row"><span class="mono">КАРТРИДЖ ЛАЗЕРНЫЙ HP 106A</span><span class="empty"></span></div>
+        <div class="esf-foot">…и так десятки строк в документе</div>
+      </div>
+      <p class="fig">Строки — из генератора тестовых ЭСФ проекта</p>
+    </div>
+  </div>
+  <aside class="notes">Получить ЭСФ в 1С уже не проблема — для этого есть штатный сервис. Проблема дальше. В разделе G поставщик пишет свои названия, а колонка «Товар» пустая. Пока её не заполнили, документ поступления не создать. Бухгалтер подбирает строку за строкой вручную. По оценке Первого БИТа, обработка десяти ЭСФ в день занимает около часа. Сколько из этого часа — именно подбор номенклатуры, мы измерим на пилоте.</aside>
+</section>
+
+<!-- 3 ─────────────────────────────────────────── -->
+<section class="slide s-why" data-title="Почему текст не помогает">
+  <div class="bg glow-coral"></div>
+  <div class="frame">
+    <p class="kicker rv">Почему это не решается поиском по тексту</p>
+    <h2 class="rv" style="--d:1">Правильный ответ знает<br>только ваша бухгалтерия</h2>
+    <div class="cards">
+      <button class="card rv" style="--d:2" aria-expanded="false">
+        <span class="card-tag">Корзина</span>
+        <span class="card-q mono">СОК ФРУТО НЯНЯ · ЙОГУРТ АКТИВИА · СЫР ХОХЛАНД</span>
+        <span class="card-a"><i class="dot ok"></i>«Продукты питания» — одна позиция на всё</span>
+        <span class="card-more">Куда именно уходит товар — привычка конкретной бухгалтерии, а не свойство текста.</span>
+      </button>
+      <button class="card rv" style="--d:3" aria-expanded="false">
+        <span class="card-tag">Своя логика</span>
+        <span class="card-q mono">ГЕЛЬ ДЛЯ МЫТЬЯ ПОСУДЫ FREYA</span>
+        <span class="card-a"><i class="dot ok"></i>«Средство для мытья рук Чистозря»</span>
+        <span class="card-more">Ни одна модель мира этого не выведет. Выводится только из того, что здесь так уже делали.</span>
+      </button>
+      <button class="card rv" style="--d:4" aria-expanded="false">
+        <span class="card-tag">Нет в справочнике</span>
+        <span class="card-q mono">КАРТРИДЖ ЛАЗЕРНЫЙ HP 106A</span>
+        <span class="card-a"><i class="dot no"></i>«не знаю» — и это правильный ответ</span>
+        <span class="card-more">Система, которая уверенно отвечает на такие строки, не умная, а опасная.</span>
+      </button>
+    </div>
+    <p class="punch rv" style="--d:5">История уже есть в базе: проведённые ЭСФ прошлых лет с&nbsp;заполненной колонкой. Один прогон — и&nbsp;память работает с&nbsp;первого дня.</p>
+  </div>
+  <aside class="notes">Мы разметили строки по сложности. Часть легко сопоставить по тексту. Но есть три класса, где текст бессилен. Корзина: сок, йогурт и сыр уходят в одну позицию «Продукты питания». Своя логика: гель для посуды — это мыло, просто потому что так решили в этой бухгалтерии. И позиции, которой нет вовсе, — тут правильный ответ «не знаю». Ключевая идея: историю не нужно копить. Проведённые ЭСФ с заполненной колонкой уже лежат в базе клиента. Один прогон — и система работает с первого дня.</aside>
+</section>
+
+<!-- 4 ─────────────────────────────────────────── -->
+<section class="slide s-how" data-title="Как работает">
+  <div class="bg glow-green"></div>
+  <div class="frame">
+    <p class="kicker rv">Как работает</p>
+    <h2 class="rv" style="--d:1">Первый уверенный ответ<br>останавливает конвейер</h2>
+    <ol class="pipe">
+      <li class="rv" style="--d:2"><span class="pipe-n mono">01</span><b>Память</b><span>что эта бухгалтерия уже выбирала для&nbsp;этого поставщика</span></li>
+      <li class="rv" style="--d:3"><span class="pipe-n mono">02</span><b>Точное совпадение</b><span>после нормализации единиц, фасовки и&nbsp;сокращений</span></li>
+      <li class="rv" style="--d:4"><span class="pipe-n mono">03</span><b>Нечёткое</b><span>токены, триграммы, бренды; размер и&nbsp;цвет — жёсткий фильтр</span></li>
+      <li class="rv later" style="--d:5"><span class="pipe-n mono">04</span><b>Модель ИИ</b><span>только на&nbsp;остаток — следующий этап, интерфейс слоя уже заложен</span></li>
+    </ol>
+    <div class="legend rv" style="--d:6">
+      <span><i class="dot ok"></i>зелёная — подобрано уверенно</span>
+      <span><i class="dot warn"></i>жёлтая — варианты, выбор в&nbsp;один клик</span>
+      <span><i class="dot no"></i>красная — не найдено</span>
+    </div>
+    <div class="twin rv" style="--d:7">
+      <p><b>Лучше уточнить, чем ошибиться.</b> Малый отрыв между кандидатами — строка уходит человеку, а&nbsp;каждое подтверждение пополняет память.</p>
+      <p><b>Всё внутри 1С.</b> Память — регистр сведений в&nbsp;той же базе. Без внешних серверов: данные бухгалтерии никуда не&nbsp;уходят.</p>
+    </div>
+  </div>
+  <aside class="notes">Строка проходит слои по порядку. Сначала память — что эта бухгалтерия уже выбирала для этого поставщика. Потом точное совпадение. Потом нечёткое: нормализуем единицы и фасовку, а размер и цвет считаем жёстким фильтром — поло XL никогда не станет поло M. Первый уверенный ответ останавливает конвейер. Если между кандидатами малый отрыв, строка становится жёлтой и уходит человеку. Языковую модель подключим на остаток — интерфейс для неё уже заложен. Всё работает внутри 1С: данные бухгалтерии никуда не уходят.</aside>
+</section>
+
+<!-- 5 ─────────────────────────────────────────── -->
+<section class="slide s-proof" data-title="Замер">
+  <div class="bg glow-green"></div>
+  <div class="frame split">
+    <div class="col-text">
+      <p class="kicker rv">Замер на стенде · главное число</p>
+      <h2 class="rv big0" style="--d:1"><span class="hl mono">0</span> тихих<br>ошибок</h2>
+      <p class="body rv" style="--d:2">Считаем не «сколько угадали», а «сколько подставили неверно без предупреждения». Во&nbsp;всех сценариях — ноль.</p>
+      <div class="inset rv" style="--d:4">
+        <span class="cap">Строки «своей логики»</span>
+        <span class="mono inset-n">0 из 6 → 5 из 6</span>
+        <span class="cap">без памяти → с памятью</span>
+      </div>
+    </div>
+    <div class="col-vis">
+      <div class="bars" role="img" aria-label="Доля строк, подобранных автоматически: базовая линия 0%, только правила 47,8%, правила и память 77,2%">
+        <div class="bar rv" style="--d:2;--v:0"><span class="bar-v mono">0%</span><span class="bar-fill"></span><span class="bar-l">Базовая линия<br><small>всегда «не знаю»</small></span></div>
+        <div class="bar rv" style="--d:3;--v:.478"><span class="bar-v mono">47,8%</span><span class="bar-fill"></span><span class="bar-l">Только правила<br><small>память пуста</small></span></div>
+        <div class="bar best rv" style="--d:4;--v:.772"><span class="bar-v mono">77,2%</span><span class="bar-fill"></span><span class="bar-l">Правила + память<br><small>история прошлого периода</small></span></div>
+      </div>
+      <p class="fig rv" style="--d:5">Доля строк, подобранных автоматически и верно. Расчёт: <span class="mono">node src/run-bench.js</span> — 92&nbsp;строки синтетических ЭСФ с&nbsp;эталоном, порог 0,75, память из&nbsp;138&nbsp;строк. Не&nbsp;данные клиента.</p>
+    </div>
+  </div>
+  <aside class="notes">Мы проверяем не «сколько угадали», а «сколько ошиблись молча». Это главное число, и оно ноль во всех сценариях. Без памяти правила подбирают 48 процентов строк. С памятью из прошлого периода — 77. Строки «своей логики»: было 0 из 6, стало 5 из 6. Честно: это синтетика из нашего генератора с эталоном, 92 строки. На реальных документах цифры будут другими — их и покажет пилот.</aside>
+</section>
+
+<!-- 6 ─────────────────────────────────────────── -->
+<section class="slide s-market" data-title="Рынок">
+  <div class="bg glow-amber"></div>
+  <div class="frame">
+    <p class="kicker rv">Кто уже есть</p>
+    <h2 class="rv" style="--d:1">Аналоги есть. Начинаем там, где&nbsp;они останавливаются</h2>
+    <div class="tbl rv" style="--d:2" role="table">
+      <div class="tr th" role="row"><span role="columnheader">Решение</span><span role="columnheader">Что делает — по их описанию</span><span role="columnheader">Для нас это значит</span></div>
+      <div class="tr" role="row"><span role="cell"><b>«1С:ЭСФ для Казахстана»</b><small>штатный сервис</small></span><span role="cell">прямой обмен ЭСФ, СНТ, ЭАВР с&nbsp;ИС&nbsp;ЭСФ</span><span role="cell">получение документов уже решено</span></div>
+      <div class="tr" role="row"><span role="cell"><b>Доработка «Первого БИТа»</b><small>расширение</small></span><span role="cell">создаёт поступления по&nbsp;ЭСФ; номенклатуру сопоставляют вручную, затем она запоминается по&nbsp;поставщику</span><span role="cell">ближайший аналог</span></div>
+      <div class="tr" role="row"><span role="cell"><b>BuhGPT</b><small>«Слава КВЦ»</small></span><span role="cell">ИИ-ассистент бухгалтера, сертификат «Совместимо!»</span><span role="cell">другая задача: ответы на&nbsp;вопросы</span></div>
+    </div>
+    <div class="focus rv" style="--d:3">
+      <span class="cap">Наш фокус для проверки</span>
+      <ul>
+        <li>подсказка для наименований, которых ещё не&nbsp;было</li>
+        <li>память из&nbsp;истории базы — за&nbsp;один прогон</li>
+        <li>тихие ошибки как главная метрика</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Аналоги есть, и мы их изучили. Штатный сервис 1С забирает ЭСФ. У Первого БИТа есть доработка, которая создаёт поступления; номенклатуру там сопоставляют вручную, а затем запоминают по поставщику. BuhGPT отвечает на вопросы бухгалтера — это другая задача. Наш фокус — строки, которые раньше не встречались, и запуск сразу на истории базы. Превосходство не заявляем: сравним на одних и тех же документах.</aside>
+</section>
+
+<!-- 7 ─────────────────────────────────────────── -->
+<section class="slide s-econ" data-title="Экономия">
+  <div class="bg glow-green"></div>
+  <div class="frame split">
+    <div class="col-text">
+      <p class="kicker rv">Как докажем экономию</p>
+      <h2 class="rv" style="--d:1">Считаем время вместе с&nbsp;проверкой</h2>
+      <p class="formula rv" style="--d:2"><span>Экономия</span> = <span>время сейчас</span> − (<span>проверка жёлтых</span> + <span>исправления</span>)</p>
+      <ul class="metrics rv" style="--d:3">
+        <li>время бухгалтера на&nbsp;одинаковый набор ЭСФ</li>
+        <li>доля строк, принятых без исправлений</li>
+        <li>тихие ошибки и&nbsp;дубли</li>
+        <li>время запуска на&nbsp;новой базе</li>
+      </ul>
+      <p class="note rv" style="--d:4"><b>Модель оплаты — гипотеза:</b> внедрение + подписка по&nbsp;числу организаций. Цену назовём после пилота.</p>
+    </div>
+    <div class="col-vis rv" style="--d:3">
+      <div class="ba">
+        <div class="ba-h"><span></span><span>До</span><span>После</span></div>
+        <div class="ba-r"><span>Минут на&nbsp;10&nbsp;ЭСФ</span><span class="ph-cell">пилот</span><span class="ph-cell">пилот</span></div>
+        <div class="ba-r"><span>Строк без правок</span><span class="ph-cell">пилот</span><span class="ph-cell">пилот</span></div>
+        <div class="ba-r"><span>Тихих ошибок</span><span class="ph-cell">пилот</span><span class="ph-cell">пилот</span></div>
+      </div>
+      <p class="fig">Таблица остаётся пустой до&nbsp;пилота — её&nbsp;заполнят реальные документы, а&nbsp;не&nbsp;слайд</p>
+    </div>
+  </div>
+  <aside class="notes">Быстро сгенерировать — не значит сэкономить. Если бухгалтер потом всё исправляет, пользы нет. Поэтому считаем полное время: проверку жёлтых строк и исправления тоже. Таблица «до и после» пока пустая — мы заполним её на пилоте, а не на слайде. Модель оплаты — гипотеза: внедрение и подписка по числу организаций.</aside>
+</section>
+
+<!-- 8 ─────────────────────────────────────────── -->
+<section class="slide s-ask" data-title="План и запрос">
+  <div class="bg glow-green"></div>
+  <div class="frame split">
+    <div class="col-text">
+      <p class="kicker rv">Что готово</p>
+      <ol class="road">
+        <li class="done rv" style="--d:1"><i></i>Движок подбора и&nbsp;стенд с&nbsp;эталоном <small>JavaScript</small></li>
+        <li class="done rv" style="--d:2"><i></i>Порт движка на&nbsp;встроенный язык&nbsp;1С <small>написан, проверка впереди</small></li>
+        <li class="rv" style="--d:3"><i></i>Учебная конфигурация для&nbsp;Казахстана <small>коробка, 4&nbsp;500&nbsp;₸ — по&nbsp;прайсам партнёров</small></li>
+        <li class="rv" style="--d:4"><i></i>Регистр памяти, первичное обучение, кнопка в&nbsp;форме ЭСФ</li>
+        <li class="rv" style="--d:5"><i></i>Пилот, затем — банковские выписки</li>
+      </ol>
+    </div>
+    <div class="col-vis ask rv" style="--d:3">
+      <p class="kicker">Запрос</p>
+      <h2>Ищем партнёра 1С и&nbsp;одну бухгалтерию для&nbsp;пилота</h2>
+      <ul>
+        <li>обезличенные ЭСФ и&nbsp;тестовая база</li>
+        <li>бухгалтер, который оценит результат</li>
+        <li>экспертиза внедрения 1С</li>
+      </ul>
+      <p class="partner"><b>Азия Сервис-Тараз</b> — официальный партнёр фирмы&nbsp;1С в&nbsp;Таразе. Предлагаем обсудить пилот. <span class="flag">Договорённостей пока нет</span></p>
+    </div>
+  </div>
+  <aside class="notes">Движок и стенд готовы, порт на встроенный язык 1С написан. Дальше — учебная конфигурация для Казахстана, регистр памяти, кнопка в форме ЭСФ. Нам нужен партнёр 1С и одна бухгалтерия для пилота: обезличенные ЭСФ, тестовая база и бухгалтер, который оценит результат. В Таразе есть официальный партнёр 1С — «Азия Сервис». Договорённостей пока нет, мы предлагаем обсудить пилот. Следующим процессом станут банковские выписки.</aside>
+</section>
+
+<!-- 9 ─────────────────────────────────────────── -->
+<section class="slide s-end" data-title="Источники">
+  <div class="bg glow-green"></div>
+  <div class="frame split">
+    <div class="col-text">
+      <h2 class="rv">Спасибо</h2>
+      <p class="body rv" style="--d:1">Код, стенд и&nbsp;порт для&nbsp;1С — в&nbsp;репозитории. Замер повторяется одной командой.</p>
+      <p class="repo mono rv" style="--d:2">github.com/meyrdinov2-hub/esf-matcher</p>
+      <p class="mono cmd rv" style="--d:3">node src/run-bench.js</p>
+    </div>
+    <div class="col-vis rv" style="--d:2">
+      <p class="kicker">Источники</p>
+      <ol class="sources">
+        <li>«Первый БИТ». Автоматизируйте ввод и&nbsp;поступление ЭСФ — 1cbit.kz/blog/avtomatiziruyte-vvod-i-postuplenie-esf <small>актуальность на&nbsp;сайте: 18.09.2026</small></li>
+        <li>pro1c.kz. Сервис «1С:ЭСФ для Казахстана»: для чего он нужен — pro1c.kz/hotline/tipovye-resheniya</li>
+        <li>1С Казахстан. BuhGPT получил сертификат «Совместимо!» — 1c.kz, 05.10.2026</li>
+        <li>Каталог партнёров 1С. Азия Сервис-Тараз — v8.1c.ru/partner/54075</li>
+        <li>Азия Сервис — asia-servis.kz</li>
+        <li>Цена учебной версии — прайсы 1c-rating.kz, 1c-sapa.kz, 1cbit.kz (по&nbsp;данным на&nbsp;август 2026)</li>
+        <li>Замер — собственный стенд, src/run-bench.js, seed 20260819</li>
+      </ol>
+    </div>
+  </div>
+  <aside class="notes">Спасибо. Код и стенд — в репозитории, замер можно повторить одной командой. Готовы к вопросам. Если спросят «это уже есть в 1С?» — получение ЭСФ есть, подбор новых наименований с обучением на истории — то, что мы проверяем. «Почему не обычная обработка?» — это и есть обработка на правилах; модель — только на остаток. «А если ошибётся?» — неуверенная строка не заполняется, она жёлтая; главная метрика — тихие ошибки.</aside>
+</section>
+
+</div>
+</div>
+
+<!-- HUD и панели -->
+<div class="hud" id="hud" aria-hidden="true"><span id="hud-n" class="mono">1 / 9</span><span class="hud-bar"><i id="hud-p"></i></span><span class="hud-hint">H — справка</span></div>
+<button class="nav prev" id="prev" aria-label="Предыдущий слайд">‹</button>
+<button class="nav next" id="next" aria-label="Следующий слайд">›</button>
+
+<div class="panel notes-panel" id="notes" hidden>
+  <div class="np-top"><span id="np-title"></span><span class="mono" id="np-timer">00:00</span></div>
+  <p id="np-text"></p>
+  <p class="np-next">Далее: <span id="np-next"></span></p>
+</div>
+<div class="overlay grid-ov" id="grid" hidden></div>
+<div class="overlay black-ov" id="black" hidden></div>
+<div class="overlay help-ov" id="help" hidden>
+  <div class="help-box">
+    <h3>Управление</h3>
+    <dl>
+      <dt>← → Space</dt><dd>листать</dd>
+      <dt>F</dt><dd>весь экран</dd>
+      <dt>G</dt><dd>все слайды</dd>
+      <dt>N</dt><dd>речь докладчика</dd>
+      <dt>T</dt><dd>таймер (сброс — Shift+T)</dd>
+      <dt>B</dt><dd>чёрный экран</dd>
+      <dt>P</dt><dd>печать / PDF</dd>
+      <dt>H</dt><dd>эта справка</dd>
+    </dl>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
